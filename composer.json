@@ -1,0 +1,62 @@
+{
+    "name": "ubermuda/audit-bundle",
+    "description": "An append-only audit trail for Symfony: who did what, with pluggable sinks, a retention window and an admin screen built on ubermuda/admin-bundle.",
+    "type": "symfony-bundle",
+    "license": "proprietary",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/ubermuda/admin-bundle"
+        }
+    ],
+    "require": {
+        "php": ">=8.4",
+        "doctrine/dbal": "^4.0",
+        "doctrine/doctrine-bundle": "^3.2",
+        "doctrine/orm": "^3.6",
+        "doctrine/persistence": "^4.0",
+        "psr/clock": "^1.0",
+        "psr/log": "^3.0",
+        "symfony/console": "^7.2|^8.0",
+        "symfony/dependency-injection": "^7.2|^8.0",
+        "symfony/doctrine-bridge": "^7.2|^8.0",
+        "symfony/event-dispatcher": "^7.2|^8.0",
+        "symfony/framework-bundle": "^7.2|^8.0",
+        "symfony/messenger": "^7.2|^8.0",
+        "symfony/scheduler": "^7.2|^8.0",
+        "symfony/security-bundle": "^7.2|^8.0",
+        "symfony/translation": "^7.2|^8.0",
+        "symfony/twig-bundle": "^7.2|^8.0",
+        "symfony/uid": "^7.2|^8.0",
+        "twig/twig": "^3.10",
+        "ubermuda/admin-bundle": "dev-main@dev",
+        "dragonmantank/cron-expression": "^3.4"
+    },
+    "require-dev": {
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^11.5",
+        "symfony/clock": "^7.2|^8.0",
+        "symfony/phpunit-bridge": "^7.2|^8.0",
+        "symfony/yaml": "^7.2|^8.0",
+        "dama/doctrine-test-bundle": "^8.0",
+        "symfony/browser-kit": "^7.2|^8.0",
+        "symfony/css-selector": "^7.2|^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ubermuda\\AuditBundle\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Ubermuda\\AuditBundle\\Test\\": "test/"
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "symfony/flex": false
+        }
+    }
+}
