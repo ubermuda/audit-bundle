@@ -1,0 +1,114 @@
+{% extends '@UbermudaAdmin/base.html.twig' %}
+
+{% block title %}{{ 'audit.admin.log.page.title'|trans({}, 'ubermuda_audit') }} — Admin{% endblock %}
+
+{% block body %}
+    <twig:UbermudaAdmin:AdminList
+        title="{{ 'audit.admin.log.title'|trans({}, 'ubermuda_audit') }}"
+        :total="total"
+        unitLabel="{{ 'audit.admin.log.unit'|trans({}, 'ubermuda_audit') }}"
+        unitLabelPlural="{{ 'audit.admin.log.unit_plural'|trans({}, 'ubermuda_audit') }}"
+        frameId="audit-log-table"
+        :filters="filters"
+        route="ubermuda_audit_log_list"
+        :page="page"
+        :totalPages="totalPages"
+        :pageList="pageList"
+        sort="{{ sort }}"
+        dir="{{ dir }}"
+        tableClass="admin-table"
+        emptyLabel="{{ 'audit.admin.log.empty'|trans({}, 'ubermuda_audit') }}"
+    >
+        <twig:block name="filter_bar">
+            <twig:UbermudaAdmin:AdminListFilterBar
+                route="ubermuda_audit_log_list"
+                frameId="audit-log-table"
+                searchPlaceholder="{{ 'audit.admin.log.filter.search_placeholder'|trans({}, 'ubermuda_audit') }}"
+                :filters="filters"
+                sort="{{ sort }}"
+                dir="{{ dir }}"
+            >
+                <twig:block name="filter_fields">
+                    <input type="text" name="operation" value="{{ filters.operation|default('') }}"
+                           placeholder="{{ 'audit.admin.log.filter.operation_placeholder'|trans({}, 'ubermuda_audit') }}"
+                           aria-label="{{ 'audit.admin.log.filter.operation'|trans({}, 'ubermuda_audit') }}"
+                           data-action="input->autosearch#search"
+                           class="admin-field-input !w-auto shrink-0">
+                    {% if channels is not empty %}
+                        <select name="channel" class="admin-field-input admin-field-select !w-auto shrink-0" aria-label="{{ 'audit.admin.log.filter.channel'|trans({}, 'ubermuda_audit') }}" data-action="change->autosearch#search">
+                            <option value="">{{ 'audit.admin.log.filter.channel_any'|trans({}, 'ubermuda_audit') }}</option>
+                            {% for channel in channels %}
+                                <option value="{{ channel }}"{{ filters.channel|default('') == channel ? ' selected' : '' }}>{{ channel }}</option>
+                            {% endfor %}
+                        </select>
+                    {% endif %}
+                    <input type="date" name="from" value="{{ filters.from|default('') }}"
+                           aria-label="{{ 'audit.admin.log.filter.from'|trans({}, 'ubermuda_audit') }}"
+                           data-action="change->autosearch#search"
+                           class="admin-field-input !w-auto shrink-0">
+                    <input type="date" name="to" value="{{ filters.to|default('') }}"
+                           aria-label="{{ 'audit.admin.log.filter.to'|trans({}, 'ubermuda_audit') }}"
+                           data-action="change->autosearch#search"
+                           class="admin-field-input !w-auto shrink-0">
+                </twig:block>
+            </twig:UbermudaAdmin:AdminListFilterBar>
+        </twig:block>
+
+        <twig:block name="thead">
+            <tr>
+                <th><twig:UbermudaAdmin:AdminListSortLink route="ubermuda_audit_log_list" column="occurredAt" label="{{ 'audit.admin.log.column.time'|trans({}, 'ubermuda_audit') }}" :currentSort="sort" :currentDir="dir" :filters="filters" /></th>
+                <th>{{ 'audit.admin.log.column.actor'|trans({}, 'ubermuda_audit') }}</th>
+                <th>{{ 'audit.admin.log.column.operation'|trans({}, 'ubermuda_audit') }}</th>
+                <th>{{ 'audit.admin.log.column.outcome'|trans({}, 'ubermuda_audit') }}</th>
+                <th>{{ 'audit.admin.log.column.subject'|trans({}, 'ubermuda_audit') }}</th>
+                <th>{{ 'audit.admin.log.column.channel'|trans({}, 'ubermuda_audit') }}</th>
+                <th>{{ 'audit.admin.log.column.context'|trans({}, 'ubermuda_audit') }}</th>
+            </tr>
+        </twig:block>
+
+        <twig:block name="tbody">
+            {% for row in rows %}
+                <tr data-audit-log-id="{{ row.id }}">
+                    <td class="whitespace-nowrap tabular-nums">{{ row.occurredAt|date('Y-m-d H:i:s') }}</td>
+                    <td>
+                        {% if row.actorLabel is not null %}
+                            {{ row.actorLabel }}
+                        {% else %}
+                            <span class="text-slate-400">{{ 'audit.admin.log.actor_none'|trans({}, 'ubermuda_audit') }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="font-mono text-xs">{{ row.operation }}</td>
+                    <td>
+                        {% if row.outcome.value == 'success' %}
+                            <span class="admin-badge admin-badge-on">{{ ('audit.admin.log.outcome.' ~ row.outcome.value)|trans({}, 'ubermuda_audit') }}</span>
+                        {% elseif row.outcome.value == 'failed' %}
+                            <span class="admin-badge admin-badge-danger">{{ ('audit.admin.log.outcome.' ~ row.outcome.value)|trans({}, 'ubermuda_audit') }}</span>
+                        {% elseif row.outcome.value == 'unchanged' %}
+                            <span class="admin-badge admin-badge-quiet">{{ ('audit.admin.log.outcome.' ~ row.outcome.value)|trans({}, 'ubermuda_audit') }}</span>
+                        {% else %}
+                            <span class="admin-badge admin-badge-off">{{ ('audit.admin.log.outcome.' ~ row.outcome.value)|trans({}, 'ubermuda_audit') }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="font-mono text-xs">
+                        {% if row.subjectType is not null %}
+                            {{ row.subjectType }}<br><span class="text-slate-400">{{ row.subjectId }}</span>
+                        {% else %}
+                            <span class="text-slate-400">—</span>
+                        {% endif %}
+                    </td>
+                    <td><span class="admin-badge admin-badge-neutral">{{ row.channel }}</span></td>
+                    <td>
+                        {% if row.context is empty %}
+                            <span class="text-slate-400">—</span>
+                        {% else %}
+                            <details class="text-xs">
+                                <summary class="cursor-pointer text-slate-500">{{ 'audit.admin.log.context.show'|trans({}, 'ubermuda_audit') }}</summary>
+                                <pre class="mt-1 overflow-x-auto rounded bg-slate-50 p-2 font-mono text-slate-700">{{ row.context|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_SLASHES')) }}</pre>
+                            </details>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </twig:block>
+    </twig:UbermudaAdmin:AdminList>
+{% endblock %}
